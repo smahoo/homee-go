@@ -3,14 +3,12 @@ package homee
 import (
 	"net/http"
 	log "github.com/golang/glog"
-
 	"strconv"
 	"github.com/connctd/homee/model"
 )
 
 
-//would be better to establish something like an event mechanism: things can be created, deleted, edited, etc.. Would be
-//stupid to create a function for each event
+
 
 type ConnectionError struct{
 	Url string
@@ -20,22 +18,24 @@ type ConnectionError struct{
 }
 
 type Client struct {
-	config     HomeeConfiguration
-	connection *apiConnection
-
-	// nodes
-	//Attributes map[int]model.Attribute
-//	Nodes map[int]model.Node
-	//Things map[int]model.Hom eeThingMapping
-
+	Config          HomeeConfiguration
+	connection      *apiConnection
+	// nodes and attributes
+	Attributes      map[int]model.Attribute
+	Nodes           map[int]model.Node
+	NodeEvents      chan HomeeNodeEvent
+	AttributeEvents chan HomeeAttributeEvent
+	//AttributeEvents chan
 }
 
 
 
 func New(config HomeeConfiguration) *Client {
-	result := Client{config:config, connection:nil}
-	//result.Nodes = make(map[int]model.Node)
-	//result.Attributes = make(map[int]model.Attribute)
+	result := Client{Config:config, connection:nil}
+	result.Nodes = make(map[int]model.Node)
+	result.Attributes = make(map[int]model.Attribute)
+	result.NodeEvents = make(chan HomeeNodeEvent)
+	result.AttributeEvents = make (chan HomeeAttributeEvent)
 	//result.Things = make(map[int]model.HomeeThingMapping)
 	return &result
 }
@@ -43,7 +43,7 @@ func New(config HomeeConfiguration) *Client {
 func (c *Client)Connect() {
 	log.Infof("establish connection")
 	if (c.connection == nil){
-		c.connection = newConnection(c.config, true)
+		c.connection = newConnection(c.Config, true)
 	}
 	c.connection.connect()
 	go c.handleHomeeMessages()
@@ -81,37 +81,44 @@ func (c *Client) handleNodesMessage(nodes []model.Node){
 }
 
 func (c *Client) handleNodeMessage(node model.Node){
-	//if _,ok := c.Nodes[node.Id]; !ok {
-	//	c.addNode(node)
-	//}
+	if _,ok := c.Nodes[node.Id]; !ok {
+		c.addNode(node)
+	}
 }
 
 func (c *Client) addNode(node model.Node){
-	//log.Infof("Adding node for '%s' - %v",c.config.UID,node)
-	//c.Nodes[node.Id] = node
-	//if thing, err := model.GenerateThingMapping(node, c.config.UID); err == nil {
-	//	log.Infof("Generated new thing mapping for node %v: %v",node.Id,thing)
-	//	c.Things[node.Id] = *thing
-	//
-	//} else {
-	//	log.Infof("Unable to generate thing mapping for node %v (uuid:%s) (node:%v)",node.Id,c.config.UID,node)
-	//}
+	log.Infof("Adding node for '%s' - %v",c.Config.UID,node)
+	c.Nodes[node.Id] = node
+	for _,attr := range node.Attributes {
+		c.addAttribute(attr)
+	}
+	event := HomeeNodeEvent{Node:&node}
+	event.EventType = EVENT_TYPE_NODE_ADDED
+	event.Client = c
+	c.NodeEvents <- event
+	//c.callback(HomeeEvent{EventType:EVENT_TYPE_NODE_ADDED, Client:c, Data:interface{}(node)})
 }
 
+func (c *Client) addAttribute(attribute model.Attribute){
+	log.Infof("Adding attribute for node '%v' - %v of type %v (current value = %v)",attribute.NodeId, attribute.Id, attribute.Type, attribute.CurrentValue)
+	c.Attributes[attribute.Id] = attribute
+}
 
 func (c *Client) handleAttributeMessage(Attribute model.Attribute){
-
-	//c.Attributes[Attribute.Id] = Attribute
-	//// when node is unknown, request that node
-	//if _,ok := c.Nodes[Attribute.NodeId];!ok {
-	//	c.requestNode(Attribute.NodeId)
-	//	// property change does not need to be handled here
-	//	// after requesting the node, all properties will be transferred as well
-	//} else {
-	//
-	//	// TODO: handle property change mapping
-	//}
-
+	c.Attributes[Attribute.Id] = Attribute
+	// when node is unknown, request that node
+	if _,ok := c.Nodes[Attribute.NodeId];!ok {
+		c.requestNode(Attribute.NodeId)
+		// property change does not need to be handled here
+		// after requesting the node, all properties will be transferred as well
+	} else {
+		event :=HomeeAttributeEvent{}
+		event.EventType = EVENT_TYPE_ATTRIBUTE_VALUE_CHANGE
+		event.Client = c
+		event.Attribute = &Attribute
+		c.AttributeEvents <- event
+		//c.callback(HomeeEvent{EventType:EVENT_TYPE_ATTRIBUTE_VALUE_CHANGE, Client:c, Data:Attribute})
+	}
 }
 
 func (c *Client) requestNode(nodeId int){
