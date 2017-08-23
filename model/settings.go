@@ -1,0 +1,6 @@
+package model
+
+
+/*
+settings": { "time": 1223243, "timezone": "Europe/Berlin", "address": "Lindenstr.%2020", "city": "G%C3%BCglingen", "zip": "72463", "state": "BW", "latitude": "49.0641830", "longitude": "9.0015070", "altitude": 196.49, "country": "Germany", "language": "de", "version": "1.0.5 (b7d8d5e)", "lan_enabled": 1, "lan_dhcp": 1, "lan_ip_address": "192.168.178.1", "lan_subnet_mask": "255.255.255.0", "lan_router": "192.168.178.1", "lan_dns": "192.168.178.1", "wlan_enabled": 1, "wlan_dhcp": 1, "wlan_ip_address": "192.168.178.1", "wlan_subnet_mask": "255.255.255.0", "wlan_router": "192.168.178.1", "wlan_dns": "192.168.178.1", "wlan_ssid": "homeeWLAN", "wlan_mode": 1, "remote_access": 1, "stand_alone_mode": 1, "online": 1, "volume": 100, "leds": 100, "gateway_id": "12345", "uid": "00055107C096", "name": "walde", "airplay": "homee", "dlna": "homee", "cubes": [ { "type": 1, "order": 1, "current_firmware": "0.3", "available_firmware": "0.3", "current_radio_firmware": "1.2", "available_radio_firmware": "1.3" }, { "type": 2, "order": 2, "current_firmware": "1.3", "available_firmware": "1.3", "current_radio_firmware": "1.2", "available_radio_firmware": "1.3" } ], "available_ssids": [ "LocalWLAN", "GuestWLAN" ], "ssh": "12345", "webhooks_key": "12345", "beta": 0 }
+ */
