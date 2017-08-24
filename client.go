@@ -96,13 +96,13 @@ func (c *Client) addNode(node model.Node){
 	event.EventType = EVENT_TYPE_NODE_ADDED
 	event.Client = c
 	c.NodeEvents <- event
-	//c.callback(HomeeEvent{EventType:EVENT_TYPE_NODE_ADDED, Client:c, Data:interface{}(node)})
 }
 
+
 func (c *Client) addAttribute(attribute model.Attribute){
-	log.Infof("Adding attribute for node '%v' - %v of type %v (current value = %v)",attribute.NodeId, attribute.Id, attribute.Type, attribute.CurrentValue)
 	c.Attributes[attribute.Id] = attribute
 }
+
 
 func (c *Client) handleAttributeMessage(Attribute model.Attribute){
 	c.Attributes[Attribute.Id] = Attribute
@@ -117,9 +117,9 @@ func (c *Client) handleAttributeMessage(Attribute model.Attribute){
 		event.Client = c
 		event.Attribute = &Attribute
 		c.AttributeEvents <- event
-		//c.callback(HomeeEvent{EventType:EVENT_TYPE_ATTRIBUTE_VALUE_CHANGE, Client:c, Data:Attribute})
 	}
 }
+
 
 func (c *Client) requestNode(nodeId int){
 	log.Infof("requesting node information for node %v",nodeId)
