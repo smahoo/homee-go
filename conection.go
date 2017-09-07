@@ -304,15 +304,19 @@ func (c *apiConnection) handleIncomingByteMessages() {
 	log.Infof("Message-Gopher for '%s' has been started",c.UID)
 	for c.State != CONNECTION_STATE_CLOSED {
 		msg := <-c.inByteMsg
-		log.Infof("received message : %s", msg);
-		var homeeMsg model.HomeeMessage
-		if err := json.Unmarshal(msg,&homeeMsg); err == nil {
-			c.IncomingMessages <- homeeMsg
-		} else {
 
+		encoded := string(msg)
+		if decoded, err := url.QueryUnescape(encoded); err == nil {
+			log.Infof("received message : %s", decoded);
+			var homeeMsg model.HomeeMessage
+			if err := json.Unmarshal([]byte(decoded),&homeeMsg); err == nil {
+				c.IncomingMessages <- homeeMsg
+			} else {
+
+			}
+		} else {
+			log.Infof("Failed to url decode message %s", encoded)
 		}
 	}
 	c.messageGopherRunnging = false
-
-
 }

@@ -49,6 +49,12 @@ func (c *Client)Connect() {
 	go c.handleHomeeMessages()
 }
 
+func (c *Client)Disconnect() {
+	log.Infof("Closing connection")
+	if (c.connection != nil){
+			c.connection.Close()
+	}
+}
 
 func (c *Client) handleHomeeMessages(){
 	for {
@@ -108,7 +114,7 @@ func (c *Client) handleAttributeMessage(Attribute model.Attribute){
 	c.Attributes[Attribute.Id] = Attribute
 	// when node is unknown, request that node
 	if _,ok := c.Nodes[Attribute.NodeId];!ok {
-		c.requestNode(Attribute.NodeId)
+		c.RequestNode(Attribute.NodeId)
 		// property change does not need to be handled here
 		// after requesting the node, all properties will be transferred as well
 	} else {
@@ -121,7 +127,7 @@ func (c *Client) handleAttributeMessage(Attribute model.Attribute){
 }
 
 
-func (c *Client) requestNode(nodeId int){
+func (c *Client) RequestNode(nodeId int){
 	log.Infof("requesting node information for node %v",nodeId)
 	c.connection.sendMessage("get:nodes/"+strconv.Itoa(nodeId))
 }
