@@ -13,6 +13,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/connctd/homee/model"
+	"crypto/tls"
 )
 
 type apiConnection struct {
@@ -96,6 +97,7 @@ func (c *apiConnection) establishConnection() error{
 	headers.Add("Sec-WebSocket-Protocol","v2");
 	// generating dialer
 	dialer := websocket.DefaultDialer
+	dialer.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	// try to connect
 	if conn,httpResponse,err := dialer.Dial(u.String(), headers); err != nil {
 		//arrr ficken man!
