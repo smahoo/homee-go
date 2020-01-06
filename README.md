@@ -1,6 +1,6 @@
 # Homee
 
-This is library written in go which allows you to connecto to homee
+This library allows you to connecto to the homee backend and communicate homee specific instruction in order to control your devices, etc.
 
 ## TODOs
 
